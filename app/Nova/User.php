@@ -2,6 +2,7 @@
 
 namespace App\Nova;
 
+use App\Nova\Actions\TestAction;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules;
 use Laravel\Nova\Fields\Gravatar;
@@ -9,7 +10,6 @@ use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use App\Nova\Actions\TestAction;
 
 class User extends Resource
 {
@@ -108,7 +108,7 @@ class User extends Resource
     public function actions(NovaRequest $request)
     {
         return [
-            new TestAction()
+            TestAction::make(),
         ];
     }
 }

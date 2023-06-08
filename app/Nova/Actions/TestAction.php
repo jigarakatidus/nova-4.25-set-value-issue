@@ -3,13 +3,14 @@
 namespace App\Nova\Actions;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ActionFields;
+use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\BooleanGroup;
 use Laravel\Nova\Fields\FormData;
-use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class TestAction extends Action
@@ -36,21 +37,17 @@ class TestAction extends Action
     public function fields(NovaRequest $request)
     {
         return [
-            Text::make(__('Test input'), 'test'),
-            Text::make(__('Result'), 'result')
-                ->dependsOn('test', function (Text $field, NovaRequest $request, FormData $form) {
-                    $resourceIds = $request->query->all('resources');
-                    if (is_null($resourceIds)) {
-                        $resourceIds = $request->query->get('resourceId');
-                        if (is_null($resourceIds)) {
-                            $resourceIds = 'not present';
-                        }
-                    } else {
-                        $resourceIds = implode(', ', $resourceIds);
-                    }
-
-                    $field->value = $form->get('test') . ' - ' . $resourceIds;
+            Boolean::make(__('Test Boolean'), 'boolean')->default(true),
+            BooleanGroup::make(__('Test Boolean Group'), 'boolean_group')->options(['foo' => 'Foo'])->default(['foo' => false])
+                ->dependsOn('boolean', function (BooleanGroup $field, NovaRequest $request, FormData $form) {
+                    $bool = (bool) $form->get('boolean');
+                    $field->setValue(['foo' => $bool]);
                 }),
-        ];
+            Boolean::make(__('Test Dependent Boolean'), 'dependent_boolean')->default(false)
+                ->dependsOn('boolean', function (Boolean $field, NovaRequest $request, FormData $form) {
+                    $bool = (bool) $form->get('boolean');
+                    $field->setValue($bool);
+                }),
+            ];
     }
 }
